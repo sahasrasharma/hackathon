@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Dashboard - Loan Management System</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <h1>💰 Loan Management System</h1>
+    <nav>
+      <span id="welcomeUser">Welcome, <strong id="userName">User</strong></span>
+      <button class="btn btn-small" id="logoutBtn">Logout</button>
+    </nav>
+  </header>
+
+  <main>
+    <!-- User Dashboard Section -->
+    <section id="userDashboard">
+      <h2>My Loan Dashboard</h2>
+      
+      <div class="stats">
+        <div class="stat-card">
+          <div class="stat-label">Total Applications</div>
+          <div class="stat-value" id="totalApplications">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Approved Loans</div>
+          <div class="stat-value" id="approvedLoans">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Total Borrowed</div>
+          <div class="stat-value" id="totalBorrowed">₹0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Outstanding</div>
+          <div class="stat-value" id="userOutstanding">₹0</div>
+        </div>
+      </div>
+
+      <div class="loan-list">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+          <h3>Loan Applications</h3>
+          <button class="btn btn-primary" id="applyLoanBtn">+ Apply for Loan</button>
+        </div>
+
+        <!-- Tabs for different loan statuses -->
+        <div class="tabs">
+          <button class="tab-btn active" data-tab="all">All</button>
+          <button class="tab-btn" data-tab="pending">Pending Review</button>
+          <button class="tab-btn" data-tab="approved">Approved</button>
+          <button class="tab-btn" data-tab="rejected">Rejected</button>
+        </div>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Application ID</th>
+                <th>Amount</th>
+                <th>Interest Rate</th>
+                <th>Duration</th>
+                <th>EMI</th>
+                <th>Status</th>
+                <th>Applied Date</th>
+                <th>Outstanding</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="userLoanTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer><p>© 2025 Loan Management System</p></footer>
+
+  <!-- Apply for Loan Modal -->
+  <div class="modal" id="applyLoanModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>💰 Apply for Loan</h3>
+        <button class="close-btn" id="closeApplyModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="applyLoanForm">
+          <div class="form-group">
+            <label for="loanAmount">💵 Loan Amount (₹)</label>
+            <input type="number" id="loanAmount" step="1000" min="1000" max="10000000" placeholder="Enter amount (e.g., 50,000)" required>
+          </div>
+
+          <div class="form-group">
+            <label for="loanPurpose">📋 Purpose of Loan</label>
+            <select id="loanPurpose" required>
+              <option value="">Select purpose</option>
+              <option value="Personal">Personal</option>
+              <option value="Business">Business</option>
+              <option value="Education">Education</option>
+              <option value="Home">Home Improvement</option>
+              <option value="Medical">Medical</option>
+              <option value="Vehicle">Vehicle</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="loanDuration">📅 Loan Duration (Months)</label>
+            <input type="number" id="loanDuration" min="6" max="360" placeholder="Enter duration (e.g., 12 months)" required>
+          </div>
+
+          <div class="form-group">
+            <label for="monthlyIncome">💰 Monthly Income (₹)</label>
+            <input type="number" id="monthlyIncome" step="1" min="1" placeholder="Enter your monthly income" required>
+          </div>
+
+          <div class="form-group">
+            <label for="employmentType">💼 Employment Type</label>
+            <select id="employmentType" required>
+              <option value="">Select employment type</option>
+              <option value="Salaried">Salaried</option>
+              <option value="Self-Employed">Self-Employed</option>
+              <option value="Business">Business Owner</option>
+              <option value="Freelancer">Freelancer</option>
+            </select>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn btn-cancel" id="cancelApplyBtn">❌ Cancel</button>
+            <button type="submit" class="btn btn-success">✅ Submit Application</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Payment Modal -->
+  <div class="modal" id="paymentModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>💳 Make Payment</h3>
+        <button class="close-btn" id="closePaymentModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="paymentForm">
+          <div class="payment-info">
+            <p><strong>Loan ID:</strong> <span id="paymentLoanId"></span></p>
+            <p><strong>EMI Amount:</strong> <span id="paymentEMI"></span></p>
+            <p><strong>Outstanding:</strong> <span id="paymentOutstanding"></span></p>
+          </div>
+
+          <div class="form-group">
+            <label for="paymentAmount">💵 Payment Amount (₹)</label>
+            <input type="number" id="paymentAmount" step="0.01" min="0" placeholder="Enter payment amount" required>
+          </div>
+
+          <div class="form-group">
+            <label for="paymentMethod">🏦 Payment Method</label>
+            <select id="paymentMethod" required>
+              <option value="">Select payment method</option>
+              <option value="UPI">UPI</option>
+              <option value="Net Banking">Net Banking</option>
+              <option value="Debit Card">Debit Card</option>
+              <option value="Credit Card">Credit Card</option>
+              <option value="Cash">Cash</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="paymentNote">📝 Note (Optional)</label>
+            <textarea id="paymentNote" rows="3" placeholder="Add a note about this payment..."></textarea>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn btn-cancel" id="cancelPaymentBtn">❌ Cancel</button>
+            <button type="submit" class="btn btn-success">✅ Process Payment</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loan Acceptance Modal -->
+  <div class="modal" id="loanAcceptanceModal">
+    <div class="modal-content" style="max-width: 600px;">
+      <div class="modal-header">
+        <h3>✅ Loan Approved - Review Terms</h3>
+        <button class="close-btn" id="closeLoanAcceptanceModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div style="background: #f0fdf4; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #10b981; margin-bottom: 1.5rem;">
+          <h4 style="color: #059669; margin-bottom: 1rem;">🎉 Congratulations! Your loan has been approved by admin.</h4>
+          <p style="color: #065f46;">Please review the loan terms below and accept or reject the offer.</p>
+        </div>
+
+        <div class="loan-details">
+          <h4>Loan Details</h4>
+          <div class="detail-grid">
+            <div><strong>Loan Amount:</strong> <span id="acceptLoanAmount"></span></div>
+            <div><strong>Interest Rate:</strong> <span id="acceptInterestRate" style="color: #3b82f6; font-weight: 700;"></span></div>
+            <div><strong>Duration:</strong> <span id="acceptDuration"></span></div>
+            <div><strong>Monthly EMI:</strong> <span id="acceptEMI" style="color: #059669; font-weight: 700;"></span></div>
+            <div><strong>Total Interest:</strong> <span id="acceptTotalInterest"></span></div>
+            <div><strong>Total Payable:</strong> <span id="acceptTotalPayable" style="font-weight: 700; font-size: 1.1rem;"></span></div>
+          </div>
+        </div>
+
+        <!-- Admin Notes Section -->
+        <div id="adminNotesSection" style="background: #dbeafe; padding: 1.25rem; border-radius: 8px; border-left: 4px solid #3b82f6; margin: 1.5rem 0; display: none;">
+          <h4 style="color: #1e40af; margin-bottom: 0.75rem; font-size: 1rem;">📝 Message from Admin</h4>
+          <p id="acceptAdminNotes" style="color: #1e3a8a; font-size: 0.95rem; line-height: 1.6; margin: 0; white-space: pre-wrap;"></p>
+        </div>
+
+        <div style="background: #fef3c7; padding: 1rem; border-radius: 8px; border-left: 4px solid #f59e0b; margin: 1.5rem 0;">
+          <p style="color: #92400e; font-size: 0.9rem;"><strong>⚠️ Important:</strong> Once you accept this loan, the amount will be disbursed and EMI payments will begin as per schedule.</p>
+        </div>
+
+        <div style="background: #fee2e2; padding: 1rem; border-radius: 8px; border-left: 4px solid #ef4444; margin-bottom: 1.5rem;">
+          <p style="color: #991b1b; font-size: 0.9rem;"><strong>Note:</strong> If you reject this offer, the loan application will be cancelled and you'll need to apply again.</p>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn" style="background: #ef4444; border-color: #ef4444;" id="rejectLoanBtn">❌ Reject Offer</button>
+          <button type="button" class="btn btn-success" id="acceptLoanBtn">✅ Accept Loan</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="user.js"></script>
+</body>
+</html>

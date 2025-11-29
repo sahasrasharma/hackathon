@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Loan Management System</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+    body {
+      margin: 0;
+      background: #f9f9f9;
+      color: #333;
+    }
+    header {
+      background: #004aad;
+      color: white;
+      padding: 1em 2em;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    nav a {
+      color: white;
+      text-decoration: none;
+      margin: 0 1em;
+    }
+    nav a.active {
+      border-bottom: 2px solid #ffd700;
+    }
+    main {
+      padding: 2em;
+    }
+    h2 {
+      color: #004aad;
+    }
+    .intro, .loan-form, .loan-list {
+      background: white;
+      border-radius: 8px;
+      padding: 1.5em;
+      margin-bottom: 2em;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    label {
+      display: block;
+      margin-top: 1em;
+      font-weight: bold;
+    }
+    input {
+      width: 100%;
+      padding: 0.5em;
+      margin-top: 0.5em;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    .btn {
+      background: #004aad;
+      color: white;
+      border: none;
+      padding: 0.7em 1.2em;
+      border-radius: 4px;
+      margin-top: 1em;
+      cursor: pointer;
+    }
+    .btn:hover {
+      background: #003580;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      text-align: center;
+      padding: 0.8em;
+      border-bottom: 1px solid #ddd;
+    }
+    footer {
+      text-align: center;
+      padding: 1em;
+      background: #004aad;
+      color: white;
+    }
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Loan Management System</h1>
+    <nav>
+      <a href="#" id="homeLink" class="active">Home</a>
+      <a href="#" id="loanLink">Manage Loans</a>
+    </nav>
+  </header>
+
+  <main>
+    <!-- Home Page -->
+    <section id="homePage" class="intro">
+      <h2>Welcome to the Loan Management System</h2>
+      <p>
+        This system helps you manage customer loans easily and efficiently.<br>
+        Track loan applications, calculate interest, and store records directly in your browser.
+      </p>
+      <button class="btn" id="goToLoan">Get Started</button>
+    </section>
+
+    <!-- Loan Management Page -->
+    <section id="loanPage" class="hidden">
+      <div class="loan-form">
+        <h2>Add New Loan</h2>
+        <form id="loanForm">
+          <label>Customer Name:</label>
+          <input type="text" id="customerName" required>
+
+          <label>Loan Amount (₹):</label>
+          <input type="number" id="loanAmount" required>
+
+          <label>Interest Rate (% per year):</label>
+          <input type="number" id="interestRate" step="0.1" required>
+
+          <label>Duration (Months):</label>
+          <input type="number" id="duration" required>
+
+          <button type="submit" class="btn">Add Loan</button>
+        </form>
+      </div>
+
+      <div class="loan-list">
+        <h2>Loan Records</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Customer Name</th>
+              <th>Amount (₹)</th>
+              <th>Interest Rate (%)</th>
+              <th>Duration (Months)</th>
+              <th>Total Payable (₹)</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="loanTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>© 2025 Loan Management System | Designed by nikhil</p>
+  </footer>
+
+  <script>
+    // Page navigation
+    const homeLink = document.getElementById('homeLink');
+    const loanLink = document.getElementById('loanLink');
+    const homePage = document.getElementById('homePage');
+    const loanPage = document.getElementById('loanPage');
+    const goToLoan = document.getElementById('goToLoan');
+
+    function showHome() {
+      homePage.classList.remove('hidden');
+      loanPage.classList.add('hidden');
+      homeLink.classList.add('active');
+      loanLink.classList.remove('active');
+    }
+
+    function showLoans() {
+      homePage.classList.add('hidden');
+      loanPage.classList.remove('hidden');
+      loanLink.classList.add('active');
+      homeLink.classList.remove('active');
+    }
+
+    homeLink.addEventListener('click', showHome);
+    loanLink.addEventListener('click', showLoans);
+    goToLoan.addEventListener('click', showLoans);
+
+    // Loan management logic
+    const form = document.getElementById('loanForm');
+    const tableBody = document.getElementById('loanTableBody');
+    let loans = JSON.parse(localStorage.getItem('loans')) || [];
+
+    function renderLoans() {
+      tableBody.innerHTML = '';
+      loans.forEach((loan, index) => {
+        const totalPayable = (loan.amount * (1 + (loan.interestRate / 100) * (loan.duration / 12))).toFixed(2);
+        const row = `
+          <tr>
+            <td>${loan.name}</td>
+            <td>${loan.amount}</td>
+            <td>${loan.interestRate}</td>
+            <td>${loan.duration}</td>
+            <td>${totalPayable}</td>
+            <td><button class="btn" onclick="deleteLoan(${index})">Delete</button></td>
+          </tr>`;
+        tableBody.insertAdjacentHTML('beforeend', row);
+      });
+    }
+
+    function saveLoans() {
+      localStorage.setItem('loans', JSON.stringify(loans));
+    }
+
+    window.deleteLoan = function(index) {
+      loans.splice(index, 1);
+      saveLoans();
+      renderLoans();
+    };
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const loan = {
+        name: document.getElementById('customerName').value,
+        amount: parseFloat(document.getElementById('loanAmount').value),
+        interestRate: parseFloat(document.getElementById('interestRate').value),
+        duration: parseInt(document.getElementById('duration').value)
+      };
+      loans.push(loan);
+      saveLoans();
+      renderLoans();
+      form.reset();
+      alert("Loan added successfully!");
+    });
+
+    renderLoans();
+  </script>
+</body>
+</html>
