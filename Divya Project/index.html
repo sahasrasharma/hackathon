@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Loan Management System</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <h1>💰 Loan Management System</h1>
+    <nav>
+      <a href="#" id="homeLink" class="active">Dashboard</a>
+      <a href="#" id="loanLink">Manage Loans</a>
+    </nav>
+  </header>
+
+  <main>
+    <!-- Dashboard Section -->
+    <section id="homePage" class="intro">
+      <h2>Dashboard Overview</h2>
+      <p>Real-time analytics of your loan portfolio and customer management.</p>
+
+      <div class="quick-stats">
+        <div class="quick-stat-item">
+          <span class="quick-stat-label">Active Customers</span>
+          <span class="quick-stat-value" id="dashboardTotalCustomers">0</span>
+        </div>
+        <div class="quick-stat-item">
+          <span class="quick-stat-label">Total Loaned</span>
+          <span class="quick-stat-value" id="dashboardTotalLoaned">₹0</span>
+        </div>
+        <div class="quick-stat-item">
+          <span class="quick-stat-label">Collection Rate</span>
+          <span class="quick-stat-value" id="dashboardCollectionRate">0%</span>
+        </div>
+        <div class="quick-stat-item">
+          <span class="quick-stat-label">Outstanding</span>
+          <span class="quick-stat-value" id="dashboardOutstanding">₹0</span>
+        </div>
+      </div>
+
+      <div class="dashboard-grid">
+        <div class="chart-card"><h3>Customer Loan Distribution</h3><canvas id="loanDistributionChart"></canvas></div>
+        <div class="chart-card"><h3>Loan Status</h3><canvas id="paymentStatusChart"></canvas></div>
+        <div class="chart-card"><h3>Customer Amounts</h3><canvas id="amountBreakdownChart"></canvas></div>
+        <div class="chart-card"><h3>Collection Timeline</h3><canvas id="paymentTrendChart"></canvas></div>
+      </div>
+    </section>
+
+    <!-- Loan Management Section -->
+    <section id="loanPage" class="hidden">
+      <div class="stats">
+        <div class="stat-card"><div class="stat-label">Active Loans</div><div class="stat-value" id="totalLoans">0</div></div>
+        <div class="stat-card"><div class="stat-label">Total Amount Loaned</div><div class="stat-value" id="totalAmount">₹0</div></div>
+        <div class="stat-card"><div class="stat-label">Outstanding Amount</div><div class="stat-value" id="totalPayable">₹0</div></div>
+      </div>
+
+      <div class="loan-list">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <h2>Loan Records</h2>
+          <button class="btn btn-primary" id="addLoanBtn">+ Add New Loan</button>
+        </div>
+
+        <div class="search-bar">
+          <input type="text" id="searchInput" placeholder="🔍 Search loans by customer name...">
+        </div>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Loan ID</th><th>Customer</th><th>Principal</th><th>Interest Rate</th><th>EMI</th><th>Total Payable</th><th>Paid</th><th>Outstanding</th><th>Status</th><th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="loanTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer><p>© 2025 Loan Management System</p></footer>
+
+  <!-- ==================== MODALS ==================== -->
+
+  <!-- Add/Edit Loan Modal -->
+  <div class="modal" id="loanModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modalTitle">Add New Loan</h2>
+        <button class="modal-close" onclick="closeLoanModal()">✕</button>
+      </div>
+      <form id="loanForm">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="customerName">Customer Name:</label>
+            <input type="text" id="customerName" placeholder="Enter customer name" required>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="loanAmount">Loan Amount (₹):</label>
+              <input type="number" id="loanAmount" placeholder="Enter loan amount" min="1" step="1" required>
+            </div>
+            <div class="form-group">
+              <label for="interestRate">Interest Rate (% per year):</label>
+              <input type="number" id="interestRate" placeholder="Enter interest rate" min="0" step="0.01" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="duration">Duration (Months):</label>
+            <input type="number" id="duration" placeholder="Enter duration in months" min="1" step="1" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-cancel" onclick="closeLoanModal()">Cancel</button>
+          <button type="submit" class="btn btn-success" id="submitBtn">Add Loan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Confirmation Modal -->
+  <div class="modal confirmation-modal" id="confirmationModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Confirm Delete</h2>
+        <button class="modal-close" onclick="closeConfirmation()">✕</button>
+      </div>
+      <div class="modal-body">
+        <p id="confirmationMessage">Are you sure you want to delete this loan record? This action cannot be undone.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-cancel" onclick="closeConfirmation()">Cancel</button>
+        <button class="btn btn-delete" id="confirmDeleteBtn">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Payment Modal -->
+  <div class="modal" id="paymentModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="paymentTitle">Make Payment</h2>
+        <button class="modal-close" onclick="closePaymentModal()">✕</button>
+      </div>
+      <form id="paymentForm">
+        <div class="modal-body">
+          <div class="payment-info">
+            <div class="info-row">
+              <span class="info-label">Loan ID:</span>
+              <span class="info-value" id="paymentLoanId">-</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Customer:</span>
+              <span class="info-value" id="paymentCustomerName">-</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Remaining Balance:</span>
+              <span class="info-value" id="paymentRemainingBalance">₹0</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="paymentAmount">Payment Amount (₹):</label>
+            <input type="number" id="paymentAmount" placeholder="Enter payment amount" min="1" step="0.01" required>
+            <small id="paymentWarning" class="warning-text" style="display: none;">⚠️ Amount cannot exceed remaining balance!</small>
+          </div>
+
+          <div class="form-group">
+            <label for="paymentDate">Payment Date:</label>
+            <input type="date" id="paymentDate" required>
+          </div>
+
+          <div class="form-group">
+            <label for="paymentMethod">Payment Method:</label>
+            <select id="paymentMethod" required>
+              <option value="Cash">Cash</option>
+              <option value="Online">Online Transfer</option>
+              <option value="Check">Check</option>
+              <option value="Card">Card</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="paymentNotes">Notes (Optional):</label>
+            <textarea id="paymentNotes" placeholder="Add any additional notes..." rows="3"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-cancel" onclick="closePaymentModal()">Cancel</button>
+          <button type="submit" class="btn btn-success">Process Payment</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Payment History Modal -->
+  <div class="modal" id="paymentHistoryModal">
+    <div class="modal-content" style="max-width: 800px;">
+      <div class="modal-header">
+        <h2 id="historyTitle">Payment History</h2>
+        <button class="modal-close" onclick="closePaymentHistory()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="payment-info" id="historyLoanInfo">
+          <div class="info-row">
+            <span class="info-label">Loan ID:</span>
+            <span class="info-value" id="historyLoanId">-</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Customer:</span>
+            <span class="info-value" id="historyCustomerName">-</span>
+          </div>
+        </div>
+
+        <div class="table-container" style="margin-top: 1em;">
+          <table>
+            <thead>
+              <tr>
+                <th style="padding: 0.7em; text-align: left; border-bottom: 2px solid var(--border-color);">Date</th>
+                <th style="padding: 0.7em; text-align: left; border-bottom: 2px solid var(--border-color);">Amount</th>
+                <th style="padding: 0.7em; text-align: left; border-bottom: 2px solid var(--border-color);">Method</th>
+                <th style="padding: 0.7em; text-align: left; border-bottom: 2px solid var(--border-color);">Notes</th>
+              </tr>
+            </thead>
+            <tbody id="paymentHistoryBody">
+              <tr>
+                <td colspan="4" style="text-align: center; padding: 1.5em; color: #999;">No payments yet</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" onclick="closePaymentHistory()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Chart.js Library -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

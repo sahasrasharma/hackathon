@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - Loan Management System</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <h1>💰 Loan Management System - Admin Panel</h1>
+    <nav>
+      <a href="#" id="dashboardLink" class="active">Dashboard</a>
+      <a href="#" id="pendingLink">Pending Applications</a>
+      <a href="#" id="allLoansLink">All Loans</a>
+      <a href="#" id="usersLink">Manage Users</a>
+      <a href="#" id="userProfilesLink">User Profiles</a>
+      <span id="welcomeAdmin">Admin: <strong>admin</strong></span>
+      <button class="btn btn-small" id="logoutBtn">Logout</button>
+    </nav>
+  </header>
+
+  <main>
+    <!-- Dashboard Section -->
+    <section id="dashboardSection">
+      <h2>Admin Dashboard</h2>
+      
+      <div class="stats">
+        <div class="stat-card">
+          <div class="stat-label">Pending Applications</div>
+          <div class="stat-value" id="pendingCount">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Total Approved</div>
+          <div class="stat-value" id="approvedCount">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Total Disbursed</div>
+          <div class="stat-value" id="totalDisbursed">₹0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Total Outstanding</div>
+          <div class="stat-value" id="adminOutstanding">₹0</div>
+        </div>
+      </div>
+
+      <div class="dashboard-grid">
+        <div class="chart-card">
+          <h3>Loan Status Overview</h3>
+          <canvas id="statusChart"></canvas>
+        </div>
+        <div class="chart-card">
+          <h3>Recent Applications</h3>
+          <div id="recentApplications" class="recent-list"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Pending Applications Section -->
+    <section id="pendingSection" class="hidden">
+      <h2>Pending Loan Applications</h2>
+      
+      <div class="loan-list">
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Application ID</th>
+                <th>Username</th>
+                <th>Amount</th>
+                <th>Purpose</th>
+                <th>Duration</th>
+                <th>Monthly Income</th>
+                <th>Employment</th>
+                <th>Applied Date</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="pendingTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- All Loans Section -->
+    <section id="allLoansSection" class="hidden">
+      <h2>All Loans</h2>
+      
+      <div class="loan-list">
+        <div class="search-bar">
+          <input type="text" id="searchInput" placeholder="Search by username, loan ID...">
+        </div>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Loan ID</th>
+                <th>Username</th>
+                <th>Amount</th>
+                <th>Interest Rate</th>
+                <th>EMI</th>
+                <th>Total Payable</th>
+                <th>Paid</th>
+                <th>Outstanding</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="allLoansTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Manage Users Section -->
+    <section id="usersSection" class="hidden">
+      <h2>Manage Users</h2>
+      
+      <div class="loan-list">
+        <div class="search-bar">
+          <input type="text" id="userSearchInput" placeholder="Search users by username, email...">
+        </div>
+
+        <div class="stats" style="margin-bottom: 2rem;">
+          <div class="stat-card">
+            <div class="stat-label">Total Users</div>
+            <div class="stat-value" id="totalUsers">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Active Borrowers</div>
+            <div class="stat-value" id="activeBorrowers">0</div>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Total Loans</th>
+                <th>Active Loans</th>
+                <th>Total Borrowed</th>
+                <th>Joined Date</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="usersTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- User Profiles Section -->
+    <section id="userProfilesSection" class="hidden">
+      <h2>User Profiles & Loan History</h2>
+      
+      <div class="loan-list">
+        <div class="search-bar">
+          <input type="text" id="profileSearchInput" placeholder="Search by username...">
+        </div>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Total Loans</th>
+                <th>Total Borrowed</th>
+                <th>Total Paid</th>
+                <th>Outstanding</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="profilesTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer><p>© 2025 Loan Management System - Admin Panel</p></footer>
+
+  <!-- Approve/Reject Modal -->
+  <div class="modal" id="reviewModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Review Loan Application</h3>
+        <button class="close-btn" id="closeReviewModal">&times;</button>
+      </div>
+      
+      <div class="loan-details">
+        <h4>Application Details</h4>
+        <div class="detail-grid">
+          <div><strong>Application ID:</strong> <span id="reviewLoanId"></span></div>
+          <div><strong>Username:</strong> <span id="reviewUsername"></span></div>
+          <div><strong>Amount:</strong> <span id="reviewAmount"></span></div>
+          <div><strong>Purpose:</strong> <span id="reviewPurpose"></span></div>
+          <div><strong>Duration:</strong> <span id="reviewDuration"></span></div>
+          <div><strong>Monthly Income:</strong> <span id="reviewIncome"></span></div>
+          <div><strong>Employment:</strong> <span id="reviewEmployment"></span></div>
+          <div><strong>Applied Date:</strong> <span id="reviewDate"></span></div>
+        </div>
+      </div>
+
+      <form id="reviewForm">
+        <div class="form-group">
+          <label for="reviewAction">Action</label>
+          <select id="reviewAction" required>
+            <option value="">Select action</option>
+            <option value="approved">Approve Loan</option>
+            <option value="rejected">Reject Application</option>
+          </select>
+        </div>
+
+        <div class="form-group" id="interestRateGroup">
+          <label for="interestRate">Interest Rate (%)</label>
+          <input type="number" id="interestRate" step="0.01" min="0" max="50" placeholder="e.g., 12.5">
+        </div>
+
+        <div class="form-group">
+          <label for="adminNotes">Admin Notes</label>
+          <textarea id="adminNotes" rows="3" placeholder="Add notes or reason for rejection..."></textarea>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn-cancel" id="cancelReviewBtn">Cancel</button>
+          <button type="submit" class="btn btn-success">Submit Decision</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Payment History Modal -->
+  <div class="modal" id="historyModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Payment History</h3>
+        <button class="close-btn" id="closeHistoryModal">&times;</button>
+      </div>
+      <div id="historyContent"></div>
+    </div>
+  </div>
+
+  <!-- Delete User Confirmation Modal -->
+  <div class="modal" id="deleteUserModal">
+    <div class="modal-content" style="max-width: 450px;">
+      <div class="modal-header" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
+        <h3>⚠️ Delete User</h3>
+        <button class="close-btn" id="closeDeleteUserModal">&times;</button>
+      </div>
+      <div style="padding: 2rem;">
+        <p style="font-size: 1.1rem; margin-bottom: 1.5rem; color: #1f2937;">
+          Are you sure you want to delete this user and all their data?
+        </p>
+        <div style="background: #fef2f2; padding: 1rem; border-radius: 8px; border-left: 4px solid #ef4444; margin-bottom: 1.5rem;">
+          <p style="color: #991b1b; font-weight: 600; margin-bottom: 0.5rem;">⚠️ This action cannot be undone!</p>
+          <p style="color: #7f1d1d; font-size: 0.9rem;">
+            <strong>Username:</strong> <span id="deleteUsername"></span><br>
+            <strong>Total Loans:</strong> <span id="deleteLoanCount"></span>
+          </p>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-cancel" id="cancelDeleteBtn">Cancel</button>
+          <button type="button" class="btn" style="background: #ef4444; border-color: #ef4444;" id="confirmDeleteBtn">Delete User</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- User Profile Detail Modal -->
+  <div class="modal" id="userProfileModal">
+    <div class="modal-content" style="max-width: 900px;">
+      <div class="modal-header">
+        <h3>👤 User Profile</h3>
+        <button class="close-btn" id="closeUserProfileModal">&times;</button>
+      </div>
+      <div style="padding: 2rem;">
+        <div class="loan-details">
+          <h4>User Information</h4>
+          <div class="detail-grid">
+            <div><strong>Username:</strong> <span id="profileUsername"></span></div>
+            <div><strong>Email:</strong> <span id="profileEmail"></span></div>
+            <div><strong>Phone:</strong> <span id="profilePhone"></span></div>
+            <div><strong>Joined:</strong> <span id="profileJoined"></span></div>
+          </div>
+        </div>
+
+        <div class="stats" style="margin: 2rem 0;">
+          <div class="stat-card">
+            <div class="stat-label">Total Borrowed</div>
+            <div class="stat-value" id="profileTotalBorrowed">₹0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Total Paid</div>
+            <div class="stat-value" id="profileTotalPaid">₹0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Outstanding</div>
+            <div class="stat-value" id="profileOutstanding">₹0</div>
+          </div>
+        </div>
+
+        <h4 style="margin-top: 2rem; margin-bottom: 1rem;">Loan History</h4>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Loan ID</th>
+                <th>Amount</th>
+                <th>Interest</th>
+                <th>Duration</th>
+                <th>Borrowed</th>
+                <th>Paid</th>
+                <th>Outstanding</th>
+                <th>Status</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody id="profileLoansTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>

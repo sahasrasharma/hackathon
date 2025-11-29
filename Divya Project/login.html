@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Loan Management System</title>
+  <link rel="stylesheet" href="login.css">
+</head>
+<body>
+  <div class="login-container">
+    <div class="login-card">
+      <div class="login-header">
+        <h1>💰 Loan Management System</h1>
+        <p>Secure Login Portal</p>
+      </div>
+
+      <form id="loginForm" class="login-form">
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input type="text" id="username" name="username" placeholder="Enter username" required autocomplete="username">
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" placeholder="Enter password" required autocomplete="current-password">
+        </div>
+
+        <button type="submit" class="btn-login">Login</button>
+
+        <div class="register-link">
+          Don't have an account? <a href="#" id="registerLink">Register here</a>
+        </div>
+      </form>
+
+      <!-- Registration Form (Hidden by default) -->
+      <form id="registerForm" class="login-form hidden">
+        <div class="form-group">
+          <label for="regUsername">Username</label>
+          <input type="text" id="regUsername" name="regUsername" placeholder="Choose a username" required>
+        </div>
+
+        <div class="form-group">
+          <label for="regEmail">Email</label>
+          <input type="email" id="regEmail" name="regEmail" placeholder="Enter email" required>
+        </div>
+
+        <div class="form-group">
+          <label for="regPhone">Phone Number</label>
+          <input type="tel" id="regPhone" name="regPhone" placeholder="Enter phone number" required>
+        </div>
+
+        <div class="form-group">
+          <label for="regPassword">Password</label>
+          <input type="password" id="regPassword" name="regPassword" placeholder="Create password" required>
+        </div>
+
+        <div class="form-group">
+          <label for="regConfirmPassword">Confirm Password</label>
+          <input type="password" id="regConfirmPassword" name="regConfirmPassword" placeholder="Confirm password" required>
+        </div>
+
+        <button type="submit" class="btn-login">Register</button>
+
+        <div class="register-link">
+          Already have an account? <a href="#" id="loginLink">Login here</a>
+        </div>
+      </form>
+    </div>
+
+    <div class="toast" id="toast"></div>
+  </div>
+
+  <script src="auth.js"></script>
+</body>
+</html>
